@@ -19,13 +19,14 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	cajas.clear();
 
 	points = 0;
-	textPoints = new Text("hola", WIDTH * 0.92, HEIGHT * 0.04, game);
+	textPoints = new Text("hola", WIDTH * 0.92, HEIGHT * 0.05, game);
 	textPoints->content = to_string(points);
 	//player = new Player(50, 50, game);
 	background = new Background("res/fondo_2.png", WIDTH*0.5, HEIGHT*0.5, -1, game);
-	backgroundPoints = new Actor("res/icono_puntos.png", WIDTH * 0.85, HEIGHT * 0.05, 24, 24, game);
+	backgroundPoints = new Actor("res/icono_puntos.png", WIDTH * 0.865, HEIGHT * 0.05, 24, 24, game);
 
 	projectiles.clear();
 
@@ -165,6 +166,13 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		// modificación para empezar a contar desde el suelo.
 		tile->y = tile->y - tile->height / 2;
 		tiles.push_back(tile);
+		space->addStaticActor(tile);
+		break;
+	}
+	case 'U': {
+		Tile* tile = new Tile("res/box.png", x, y, game);
+		tile->y = tile->y - tile->height / 2;
+		cajas.push_back(tile);
 		space->addStaticActor(tile);
 		break;
 	}
@@ -340,6 +348,36 @@ void GameLayer::update() {
 
 	list<Enemy*> deleteEnemies; // lista enlazada
 	list<Projectile*> deleteProjectiles;
+	list<Tile*> deleteCajas;
+
+	for (auto const& caja : cajas) {
+		for (auto const& projectile : projectiles) {
+			if (caja->isOverlap(projectile)) {
+				bool pInList = std::find(deleteProjectiles.begin(),
+					deleteProjectiles.end(),
+					projectile) != deleteProjectiles.end();
+
+				if (!pInList) {
+					deleteProjectiles.push_back(projectile);
+				}
+				bool pInList2 = std::find(deleteCajas.begin(),
+					deleteCajas.end(),
+					caja) != deleteCajas.end();
+
+				if (!pInList2) {
+					deleteCajas.push_back(caja);
+				}
+				space->removeStaticActor(caja);
+				points+=2;
+				textPoints->content = to_string(points);
+			}
+		}
+	}
+
+	for (auto const& delCaja : deleteCajas) {
+		cajas.remove(delCaja);
+	}
+	deleteCajas.clear();
 
 	for (auto const& enemy : enemies) {
 		for (auto const& projectile : projectiles) {
@@ -420,6 +458,10 @@ void GameLayer::draw() {
 
 	for (const auto& tile : tiles) {
 		tile->draw(scrollX);
+	}
+
+	for (const auto& caja : cajas) {
+		caja->draw(scrollX);
 	}
 
 	for (auto const& projectile : projectiles) {
