@@ -355,18 +355,20 @@ void GameLayer::update() {
 				points++;
 				textPoints->content = to_string(points);
 			}
-			if (projectile->isInRender(scrollX) == false || projectile->vx == 0) {
-				bool pInList = std::find(deleteProjectiles.begin(),
-					deleteProjectiles.end(),
-					projectile) != deleteProjectiles.end();
-
-				if (!pInList) {
-					deleteProjectiles.push_back(projectile);
-				}
-			}
 		}
 	}
 
+	for (auto const& projectile : projectiles) {
+		if (projectile->isInRender(scrollX) == false || projectile->vx == 0) {
+			bool pInList = std::find(deleteProjectiles.begin(),
+				deleteProjectiles.end(),
+				projectile) != deleteProjectiles.end();
+
+			if (!pInList) {
+				deleteProjectiles.push_back(projectile);
+			}
+		}
+	}
 
 	for (auto &const enemy : enemies) {
 		if (enemy->state == game->stateDead) {
