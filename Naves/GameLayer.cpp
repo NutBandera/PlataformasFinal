@@ -20,6 +20,7 @@ void GameLayer::init() {
 	scrollX = 0;
 	tiles.clear();
 	cajas.clear();
+	trampolines.clear();
 
 	points = 0;
 	textPoints = new Text("hola", WIDTH * 0.92, HEIGHT * 0.05, game);
@@ -173,6 +174,13 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		Tile* tile = new Tile("res/box.png", x, y, game);
 		tile->y = tile->y - tile->height / 2;
 		cajas.push_back(tile);
+		space->addStaticActor(tile);
+		break;
+	}
+	case 'Y': {
+		Tile* tile = new Tile("res/trampolin.png", x, y, game);
+		tile->y = tile->y - tile->height / 2;
+		trampolines.push_back(tile);
 		space->addStaticActor(tile);
 		break;
 	}
@@ -396,6 +404,12 @@ void GameLayer::update() {
 		}
 	}
 
+	for (auto const& trampolin : trampolines) {
+		if (player->isOverlap(trampolin)) {
+			player->jump(-20);
+		}
+	}
+
 	for (auto const& projectile : projectiles) {
 		if (projectile->isInRender(scrollX) == false || projectile->vx == 0) {
 			bool pInList = std::find(deleteProjectiles.begin(),
@@ -462,6 +476,10 @@ void GameLayer::draw() {
 
 	for (const auto& caja : cajas) {
 		caja->draw(scrollX);
+	}
+
+	for (const auto& trampolin : trampolines) {
+		trampolin->draw(scrollX);
 	}
 
 	for (auto const& projectile : projectiles) {

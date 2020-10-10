@@ -14,7 +14,7 @@ public:
 	void draw(float scrollX = 0) override;
 	int shootCadence = 20;
 	int shootTime = 0;
-	void jump();
+	void jump(int v = -16);
 	bool onAir;
 	void loseLife();
 

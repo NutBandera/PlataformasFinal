@@ -59,4 +59,5 @@ public:
 	list<Enemy*> enemies;
 	list<Projectile*> projectiles;
 	list<Tile*> cajas;
+	list<Tile*> trampolines;
 };
