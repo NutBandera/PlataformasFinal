@@ -9,6 +9,7 @@
 #include "Space.h"
 #include "Audio.h"
 #include "Pad.h"
+#include "Recolectable.h"
 #include <list>
 #include <fstream>
 #include <sstream>
@@ -51,6 +52,10 @@ public:
 
 	int points;
 
+	Text* textItems;
+	Actor* backgroundItems;
+	int items;
+
 	bool controlContinue = false;
 	bool controlShoot = false;
 	int controlMoveY = 0;
@@ -60,4 +65,5 @@ public:
 	list<Projectile*> projectiles;
 	list<Tile*> cajas;
 	list<Tile*> trampolines;
+	list<Recolectable*> recolectables;
 };

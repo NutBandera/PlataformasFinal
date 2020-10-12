@@ -18,25 +18,25 @@ void GameLayer::init() {
 
 	space = new Space(1);
 	scrollX = 0;
-	tiles.clear();
-	cajas.clear();
-	trampolines.clear();
-
+	
+	items = 0;
+	textItems = new Text("0", WIDTH * 0.81, HEIGHT * 0.05, game);
+	textItems->content = to_string(items);
+	backgroundItems = new Actor("res/item.png", WIDTH * 0.755, HEIGHT * 0.06, 24, 24, game);
 	points = 0;
-	textPoints = new Text("hola", WIDTH * 0.92, HEIGHT * 0.05, game);
+	textPoints = new Text("0", WIDTH * 0.92, HEIGHT * 0.05, game);
 	textPoints->content = to_string(points);
-	//player = new Player(50, 50, game);
 	background = new Background("res/fondo_2.png", WIDTH*0.5, HEIGHT*0.5, -1, game);
 	backgroundPoints = new Actor("res/icono_puntos.png", WIDTH * 0.865, HEIGHT * 0.05, 24, 24, game);
 
-	projectiles.clear();
+	projectiles.clear(); // Vaciar por si reiniciamos el juego
+	enemies.clear(); 
+	tiles.clear();
+	cajas.clear();
+	trampolines.clear();
+	recolectables.clear();
 
-	enemies.clear(); // Vaciar por si reiniciamos el juego
-
-	//loadMap("res/0.txt");
 	loadMap("res/" + to_string(game->currentLevel) + ".txt");
-	//enemies.push_back(new Enemy(300, 50, game));
-	//enemies.push_back(new Enemy(300, 200, game));
 
 }
 
@@ -182,6 +182,13 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		tile->y = tile->y - tile->height / 2;
 		trampolines.push_back(tile);
 		space->addStaticActor(tile);
+		break;
+	}
+	case 'R': {
+		Recolectable* item = new Recolectable(x, y, game);
+		item->y = item->y - item->height / 2;
+		recolectables.push_back(item);
+		space->addDynamicActor(item);
 		break;
 	}
 	}
@@ -410,6 +417,28 @@ void GameLayer::update() {
 		}
 	}
 
+	list<Recolectable*> deleteItems;
+
+	for (auto const& item : recolectables) {
+		if (player->isOverlap(item)) {
+			items++;
+			textItems->content = to_string(items);
+			bool rInList = std::find(deleteItems.begin(),
+				deleteItems.end(),
+				item) != deleteItems.end();
+
+			if (!rInList) {
+				deleteItems.push_back(item);
+			}
+		}
+	}
+
+	for (auto const& delItem : deleteItems) {
+		recolectables.remove(delItem);
+		space->removeDynamicActor(delItem);
+	}
+	deleteItems.clear();
+
 	for (auto const& projectile : projectiles) {
 		if (projectile->isInRender(scrollX) == false || projectile->vx == 0) {
 			bool pInList = std::find(deleteProjectiles.begin(),
@@ -451,6 +480,10 @@ void GameLayer::update() {
 	for (const auto& projectile: projectiles) {
 		projectile->update();
 	}
+
+	for (const auto& item : recolectables) {
+		item->update();
+	}
 }
 
 void GameLayer::calculateScroll() {
@@ -485,6 +518,11 @@ void GameLayer::draw() {
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX);
 	}
+
+	for (const auto& item : recolectables) {
+		item->draw(scrollX);
+	}
+
 	cup->draw(scrollX);
 	player->draw(scrollX);
 
@@ -495,6 +533,9 @@ void GameLayer::draw() {
 	// HUD
 	backgroundPoints->draw();
 	textPoints->draw();
+	backgroundItems->draw();
+	textItems->draw();
+
 	if (game->input == GameInputType::MOUSE) {
 		buttonJump->draw(); // NO TIENEN SCROLL, POSICION FIJA
 		buttonShoot->draw(); // NO TIENEN SCROLL, POSICION FIJA
