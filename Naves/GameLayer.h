@@ -65,5 +65,6 @@ public:
 	list<Projectile*> projectiles;
 	list<Tile*> cajas;
 	list<Tile*> trampolines;
+	list<Tile*> bloquesDestruibles;
 	list<Recolectable*> recolectables;
 };

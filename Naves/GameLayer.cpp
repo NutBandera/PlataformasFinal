@@ -35,6 +35,7 @@ void GameLayer::init() {
 	cajas.clear();
 	trampolines.clear();
 	recolectables.clear();
+	bloquesDestruibles.clear();
 
 	loadMap("res/" + to_string(game->currentLevel) + ".txt");
 
@@ -189,6 +190,13 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		item->y = item->y - item->height / 2;
 		recolectables.push_back(item);
 		space->addDynamicActor(item);
+		break;
+	}
+	case 'W': {
+		Tile* tile = new Tile("res/bloque_des.png", x, y, 30, game);
+		tile->y = tile->y - tile->height / 2;
+		bloquesDestruibles.push_back(tile);
+		space->addStaticActor(tile);
 		break;
 	}
 	}
@@ -462,6 +470,30 @@ void GameLayer::update() {
 		}
 	}
 
+	list<Tile*> deleteBlocks;
+
+	for (auto const& bloque : bloquesDestruibles) {
+		if (player->isOverlap(bloque)) { // change to isOver
+			bloque->reduceLife();
+			if (bloque->getLifeSeconds() == 0) {
+				bool bInList2 = std::find(deleteBlocks.begin(),
+					deleteBlocks.end(),
+					bloque) != deleteBlocks.end();
+
+				if (!bInList2) {
+					deleteBlocks.push_back(bloque);
+				}
+				space->removeStaticActor(bloque);
+			}
+		}
+	}
+
+	for (auto const& delBloque : deleteBlocks) {
+		bloquesDestruibles.remove(delBloque);
+	}
+	deleteBlocks.clear();
+
+
 	for (auto const& delEnemy : deleteEnemies) {
 		enemies.remove(delEnemy);
 		space->removeDynamicActor(delEnemy);
@@ -521,6 +553,10 @@ void GameLayer::draw() {
 
 	for (const auto& item : recolectables) {
 		item->draw(scrollX);
+	}
+
+	for (const auto& bloque : bloquesDestruibles) {
+		bloque->draw(scrollX);
 	}
 
 	cup->draw(scrollX);
