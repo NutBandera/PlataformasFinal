@@ -157,7 +157,12 @@ void GameLayer::loadMapObject(char character, float x, float y)
 	}
 
 	case '1': {
-		player = new Player(x, y, game);
+		if (saved) {
+			player = new Player(checkpoint->x, checkpoint->y, game);
+		}
+		else {
+			player = new Player(x, y, game);
+		}
 		// modificación para empezar a contar desde el suelo.
 		player->y = player->y - player->height / 2;
 		space->addDynamicActor(player);
@@ -197,6 +202,12 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		tile->y = tile->y - tile->height / 2;
 		bloquesDestruibles.push_back(tile);
 		space->addStaticActor(tile);
+		break;
+	}
+	case 'A': {
+		checkpoint = new Checkpoint(x, y, game);
+		checkpoint->y = checkpoint->y - checkpoint->height / 2;
+		space->addDynamicActor(checkpoint);
 		break;
 	}
 	}
@@ -327,6 +338,12 @@ void GameLayer::update() {
 		return;
 	}
 
+	if (player->isOverlap(checkpoint) && checkpoint->animation == nullptr) {
+		checkpoint->animation = new Animation("res/checkpoint_flag.png", 
+			checkpoint->width, checkpoint->height, 640, 64, 6, 10, true, game);
+		saved = true;
+	}
+
 	// Nivel superado
 	if (cup->isOverlap(player)) {
 		game->currentLevel++;
@@ -336,6 +353,8 @@ void GameLayer::update() {
 		message = new Actor("res/mensaje_ganar.png", WIDTH * 0.5, HEIGHT * 0.5,
 			WIDTH, HEIGHT, game);
 		pause = true;
+		saved = false;
+		checkpoint->animation = nullptr;
 		init();
 	}
 
@@ -354,6 +373,7 @@ void GameLayer::update() {
 	}*/
 
 	player->update();
+	checkpoint->update();
 	for (auto const& enemy : enemies) {
 		enemy->update();
 	}
@@ -560,6 +580,7 @@ void GameLayer::draw() {
 	}
 
 	cup->draw(scrollX);
+	checkpoint->draw(scrollX);
 	player->draw(scrollX);
 
 	for (auto const& enemy : enemies) {

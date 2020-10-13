@@ -9,7 +9,9 @@
 #include "Space.h"
 #include "Audio.h"
 #include "Pad.h"
+#include "Checkpoint.h"
 #include "Recolectable.h"
+#include "Checkpoint.h"
 #include <list>
 #include <fstream>
 #include <sstream>
@@ -49,6 +51,7 @@ public:
 	Text* textPoints;
 	Audio* audioBackground;
 	Tile* cup; // Elemento de final de nivel
+	Checkpoint* checkpoint;
 
 	int points;
 
@@ -60,6 +63,8 @@ public:
 	bool controlShoot = false;
 	int controlMoveY = 0;
 	int controlMoveX = 0;
+
+	bool saved = false;
 
 	list<Enemy*> enemies;
 	list<Projectile*> projectiles;
